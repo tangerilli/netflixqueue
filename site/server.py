@@ -46,6 +46,9 @@ class QueueItem(Base):
     @staticmethod
     def list(session):
         return session.query(QueueItem).all()
+        
+    def to_json(self):
+        return json.dumps({"movie_id":self.movie_id, "movie_title":self.movie_title, "queued":True})
  
  
 class SAEnginePlugin(plugins.SimplePlugin):
@@ -126,7 +129,7 @@ class Queue(object):
         return "queue list for %s goes here" % email_address
     
     @cherrypy.expose
-    def add(self, email_address, movie_id=None, title=None):
+    def add(self, email_address, movie_id, title=None):
         try:
             # Get the user
             user = self.get_user(email_address)
@@ -153,7 +156,19 @@ class Queue(object):
             return json.dumps({"result":"ok"})
         except Exception, e:
             return json.dumps({"result":"error", "error_msg":str(e)})
-            
+    
+    @cherrypy.expose
+    def get(self, email_address, movie_id):
+        try:
+            user = self.get_user(email_address)
+            queued_items = self.get_queue(user, movie_id).all()
+            if queued_items:
+                return queued_items[0].to_json()
+            else:
+                return json.dumps({"queued":False})
+        except Exception, e:
+            return json.dumps({"queued":False})
+    
     def get_user(self, email_address):
         return cherrypy.request.db.query(User).filter(User.email_address == email_address).first()
 
@@ -185,8 +200,9 @@ def setup_routes():
     d.mapper.explicit = False
     d.connect('users', '/users', Users())
     d.connect('queue', '/users/:email_address/queue', Queue(), conditions={'method':['GET']})
-    d.connect('queue', '/users/:email_address/queue', Queue(), conditions={'method':['POST']}, action="add")
+    d.connect('queue', '/users/:email_address/queue/:movie_id', Queue(), conditions={'method':['POST']}, action="add")
     d.connect('queue', '/users/:email_address/queue/:movie_id', Queue(), conditions={'method':['DELETE']}, action="delete")
+    d.connect('queue', '/users/:email_address/queue/:movie_id', Queue(), conditions={'method':['GET']}, action="get")
     d.connect('main', '/', Root())
     return d
     
