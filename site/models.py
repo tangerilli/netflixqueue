@@ -12,6 +12,10 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     email_address = Column(String)
+    
+    def __init__(self, email_address):
+        Base.__init__(self)
+        self.email_address = email_address
  
 class QueueItem(Base):
     __tablename__ = 'queue_items'

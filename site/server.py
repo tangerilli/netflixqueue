@@ -12,7 +12,12 @@ except:
     import simplejson as json 
 
 def get_user(email_address):
-    return cherrypy.request.db.query(User).filter(User.email_address == email_address).first()
+    user = cherrypy.request.db.query(User).filter(User.email_address == email_address).first()
+    # TODO: For now, just create the user if it doesn't exist
+    if user is None:
+        user = User(email_address)
+        cherrypy.request.db.add(user)
+    return user
 
 def get_queue(user, movie_id=None):
     qry = cherrypy.request.db.query(QueueItem).filter(QueueItem.user == user)
