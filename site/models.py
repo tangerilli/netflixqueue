@@ -5,6 +5,8 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.types import String, Integer
 
 from framework import Base
+
+import simplejson as json 
  
 class User(Base):
     __tablename__ = 'users'
