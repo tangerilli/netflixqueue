@@ -5,11 +5,7 @@ import framework
 from models import QueueItem, User
 
 import cherrypy
-
-try:
-    import json
-except:
-    import simplejson as json 
+import simplejson as json 
 
 def get_user(email_address):
     user = cherrypy.request.db.query(User).filter(User.email_address == email_address).first()
@@ -28,12 +24,17 @@ def get_queue(user, movie_id=None):
 class QueueView(object):
     @cherrypy.expose
     def index(self, email_address):
+        print cherrypy.request.headers
         #TODO: Check content type before returning list
         user = get_user(email_address)
         queue = get_queue(user)
-        # TODO: Fix things so we're not deserializing then serializing again
         # TODO: Add the URL of each queued item to the list
-        return json.dumps([json.loads(item.to_json()) for item in queue.all()])
+        if "application/json" in cherrypy.request.headers["Accept"]:
+            cherrypy.response.headers['Content-Type']= 'application/json'
+            return json.dumps([item.to_dict() for item in queue.all()])
+        else:
+            list_items = ["<li><a href='%s'>%s</li>" % (item.netflix_url, item.movie_title) for item in queue.all()]
+            return "<html><body><h1>Queue</h1><ul>%s</ul></body></html>" % ("\n".join(list_items))
 
 class QueueItemView(object):
     @cherrypy.expose
@@ -65,12 +66,12 @@ class QueueItemView(object):
     
     @cherrypy.expose
     def get(self, email_address, movie_id):
-        print cherrypy.request.headers
         try:
             user = get_user(email_address)
+            print "user = %s" % user
             queued_items = get_queue(user, movie_id).all()
             if queued_items:
-                return queued_items[0].to_json()
+                return json.dumps(queued_items[0].to_dict())
             else:
                 return json.dumps({"queued":False})
         except Exception, e:

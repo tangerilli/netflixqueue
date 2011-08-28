@@ -37,10 +37,19 @@ class QueueItem(Base):
  
     def __unicode__(self):
         return self.movie_title
+        
+    def get_netflix_url(self):
+        return "http://ca.movies.netflix.com/WiMovie/Star_Trek/%s" % self.movie_id
+    netflix_url = property(get_netflix_url)
+    
+    def get_url(self):
+        return "/users/%s/queue/%s" % (self.user.email_address, self.movie_id)
+    url = property(get_url)
  
     @staticmethod
     def list(session):
         return session.query(QueueItem).all()
         
-    def to_json(self):
-        return json.dumps({"movie_id":self.movie_id, "movie_title":self.movie_title, "queued":True})
+    def to_dict(self):
+        return {"movie_id":self.movie_id, "movie_title":self.movie_title, 
+                "queued":True, "URI":self.url, "netflix_url":self.netflix_url}
