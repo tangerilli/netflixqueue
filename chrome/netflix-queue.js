@@ -7,6 +7,9 @@ $(function() {
     var movie_url = "http://localhost:8080/users/" + user_email + "/queue/" + movie_id
     $.getJSON(movie_url, function(data) {
         create_button(data.queued);
+    })
+    .error(function() { 
+        create_button(false);
     });
     
     function create_button(is_queued) {
