@@ -1,16 +1,39 @@
-function check_watched(user_email, queue_url)
+function getQueryParams(qs) {
+    qs = qs.split("+").join(" ");
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])]
+            = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+
+function delete_movie(queue_url, movie_id)
+{
+    $.ajax({url:queue_url + "/" + movie_id,
+            type: 'DELETE',
+            dataType:"json"});
+}
+
+function check_watched(queue_url)
 {
     var url = window.location.pathname.split("/");
+    var $_GET = getQueryParams(document.location.search);
     console.debug(url);
     if(url[url.length-1] == "WiViewingActivity") {
         console.debug("On activity viewing page");
         $("a.mdpLink").each(function(index, link) {
             link_id = $(link).attr("id");
             movie_id = link_id.slice(2, link_id.length-2);
-            $.ajax({url:queue_url + "/" + movie_id,
-                    type: 'DELETE',
-                    dataType:"json"});
+            delete_movie(queue_url, movie_id);
         });
+    }
+    if(url[url.length-1] == "WiPlayer") {
+        delete_movie(queue_url, $_GET.movieid);
     }
 }
 
@@ -23,7 +46,7 @@ $(function() {
     var queue_url = "http://localhost:8080/users/" + user_email + "/queue";
     var movie_url =  queue_url + "/"+ movie_id;
     // See if we can figure out if a movie is/has been watched
-    check_watched(user_email, queue_url);
+    check_watched(queue_url);
     
     // Setup the queue button
     $.getJSON(movie_url, function(data) {
