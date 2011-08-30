@@ -4,7 +4,7 @@
   "description": "Queue movies on the Netflix Canada Website",
   "content_scripts": [
       {
-        "matches": ["http://ca.movies.netflix.com/*"],
+        "matches": ["http://ca.movies.netflix.com/*", "https://account.netflix.com/WiViewingActivity*"],
         "css": ["netflix.css"],
         "js": ["jquery.js", "netflix-queue.js"]
       }

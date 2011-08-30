@@ -1,11 +1,29 @@
+function check_watched(user_email, queue_url)
+{
+    var url = window.location.pathname.split("/");
+    console.debug(url);
+    if(url[url.length-1] == "WiViewingActivity") {
+        console.debug("On activity viewing page");
+        $("a.mdpLink").each(function(index, link) {
+            link_id = $(link).attr("id");
+            movie_id = link_id.slice(2, link_id.length-2);
+            $.ajax({url:queue_url + "/" + movie_id,
+                    type: 'DELETE',
+                    dataType:"json"});
+        });
+    }
+}
+
 $(function() {
     console.debug("Netflix queue plugin init..");
     var path_elements = window.location.pathname.split("/");
     var movie_id = path_elements[path_elements.length-1];
     // TODO: Get user email
     var user_email = "tony@angerilli.ca";
-    var movie_url = "http://localhost:8080/users/" + user_email + "/queue/" + movie_id
     var queue_url = "http://localhost:8080/users/" + user_email + "/queue";
+    var movie_url =  queue_url + "/"+ movie_id;
+    // See if we can figure out if a movie is/has been watched
+    check_watched(user_email, queue_url);
     
     // Setup the queue button
     $.getJSON(movie_url, function(data) {
