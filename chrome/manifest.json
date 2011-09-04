@@ -5,8 +5,8 @@
   "content_scripts": [
       {
         "matches": ["http://ca.movies.netflix.com/*", "https://account.netflix.com/WiViewingActivity*"],
-        "css": ["netflix.css"],
-        "js": ["jquery.js", "netflix-queue.js"]
+        "css": ["netflix.css", "css/css3buttons.css"],
+        "js": ["jquery.js", "js/md5-min.js", "netflix-queue.js"]
       }
     ],
     "permissions": [

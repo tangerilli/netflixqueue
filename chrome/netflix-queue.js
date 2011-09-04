@@ -1,3 +1,19 @@
+function supports_html5_storage() {
+  try {
+    return 'localStorage' in window && window['localStorage'] !== null;
+  } catch (e) {
+    return false;
+  }
+}
+
+function get_user_email() {
+    if(supports_html5_storage())
+    {
+        return localStorage["netflixqueue_userEmail"];
+    }
+    return undefined;
+}
+
 function getQueryParams(qs) {
     qs = qs.split("+").join(" ");
     var params = {},
@@ -37,19 +53,51 @@ function check_watched(queue_url)
     }
 }
 
+function prompt_for_user() {
+    var login_div = $("<div id='queue_login'><span class='title'>Netflix Queue Plugin Setup</span>" + 
+                      "<label>Email address:</label> <input type='text' id='email'/>" +
+                      "<label>Password:</label> <input type='password' id='password'/>" +
+                      "<button class='button' id='save_button'>Save</button>" +
+                      "<button class='button' id='cancel_button'>Cancel</button></div>");
+    if(get_user_email())
+    {
+        login_div.find("#email").val(get_user_email());
+    }
+    
+    login_div.find("#save_button").click(function () {
+        user_email = login_div.find("#email").val();
+        password = login_div.find("#password").val();
+        hashed_password = hex_md5(password);
+        localStorage["netflixqueue_userEmail"] = user_email;
+        localStorage["netflixqueue_userPassword"] = hashed_password;
+        login_div.slideUp("slow");
+    });
+    login_div.find("#cancel_button").click(function () {
+        login_div.slideUp("slow");
+    });
+    $("body").prepend(login_div);
+    login_div.slideDown(2000);
+    console.debug("Prompting for email");
+}
+
+function get_queue_url() {
+    return "http://localhost:8080/users/" + get_user_email() + "/queue";
+}
+
+function get_movie_url(movie_id) {
+    return get_queue_url() + "/"+ movie_id;
+}
+
 $(function() {
     console.debug("Netflix queue plugin init..");
     var path_elements = window.location.pathname.split("/");
     var movie_id = path_elements[path_elements.length-1];
-    // TODO: Get user email
-    var user_email = "tony@angerilli.ca";
-    var queue_url = "http://localhost:8080/users/" + user_email + "/queue";
-    var movie_url =  queue_url + "/"+ movie_id;
+    
     // See if we can figure out if a movie is/has been watched
-    check_watched(queue_url);
+    check_watched(get_queue_url());
     
     // Setup the queue button
-    $.getJSON(movie_url, function(data) {
+    $.getJSON(get_movie_url(movie_id), function(data) {
         create_button(data.queued);
     })
     .error(function() { 
@@ -57,8 +105,13 @@ $(function() {
         create_button(false);
     });
 
-    var queue_dialog = $("<div class='dropdown-menu dropdown-profiles' id='queue_dialog'><ul id='queue_list'></ul></div>");
+    var queue_dialog = $("<div class='dropdown-menu dropdown-profiles' id='outer_queue_dialog'><div id='queue_dialog'>" +
+                         "<ul id='queue_list'></ul></div><a href='#' id='configure_link'>Configure Queue Plugin</a></div>");
     queue_dialog.css("position", "absolute");
+    queue_dialog.find("#configure_link").click(function() {
+        prompt_for_user();
+        queue_dialog.hide();
+    });
     $("body").append(queue_dialog);
     queue_dialog.hover(function() {
         // Need to show the queue as we leave the link and enter the dialog
@@ -71,13 +124,19 @@ $(function() {
 
     // Setup the queue list link
     queue_link = $("<a href='#'>View Queue</a>").click(function() {
+        if(!get_user_email())
+        {
+            prompt_for_user();
+            return;
+        }
+        
         pos = $(this).parent().offset();
         top_pos = pos.top + $(this).innerHeight();
         left_pos = pos.left + $(this).innerWidth() - 200 + 10;
         queue_dialog.css("top", top_pos + "px");
         queue_dialog.css("left", left_pos + "px");
         // Fetch the queue data
-        $.getJSON(queue_url, function(data) {
+        $.getJSON(get_queue_url(), function(data) {
             var list_el = queue_dialog.find("#queue_list");
             list_el.empty();
             $.each(data, function(index, queued_item) {
@@ -113,7 +172,7 @@ $(function() {
             var current_state = queue_button.find(".queue_text").html();
             if (current_state == "Queue")
             {
-                $.post(movie_url, 
+                $.post(get_movie_url(movie_id), 
                         {"title":title}, 
                         function(data, textStatus, jxXHR) {
                             console.debug(data);
@@ -126,7 +185,7 @@ $(function() {
             }
             else if (current_state == "Unqueue")
             {
-                $.ajax({url:movie_url, 
+                $.ajax({url:get_movie_url(movie_id), 
                         success:function(data, textStatus, jxXHR) {
                             console.debug(data);
                             if (data.result == "ok")
