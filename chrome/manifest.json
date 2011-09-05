@@ -1,15 +1,16 @@
 {
   "name": "Netflix Canada Queue",
   "version": "0.1",
-  "description": "Queue movies on the Netflix Canada Website",
+  "description": "Queue movies on the Netflix Canada website",
   "content_scripts": [
       {
         "matches": ["http://ca.movies.netflix.com/*", "https://account.netflix.com/WiViewingActivity*"],
-        "css": ["netflix.css", "css/css3buttons.css"],
-        "js": ["jquery.js", "js/md5-min.js", "netflix-queue.js"]
+        "css": ["css/netflix.css", "css/css3buttons.css"],
+        "js": ["js/jquery.js", "js/md5-min.js", "js/netflix-queue.js"]
       }
     ],
     "permissions": [
         "http://localhost/"
-      ]
+      ],
+    "homepage_url": "http://tony.angerilli.ca/netflixqueue"
 }
