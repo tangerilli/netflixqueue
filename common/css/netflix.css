@@ -30,6 +30,7 @@
 
 #queue_login label {
     font-weight: bold;
+    margin-left: 10px;
 }
 
 #queue_login input {
@@ -38,4 +39,5 @@
 
 #queue_login button {
     margin-right: 5px;
+    margin-left: 5px;
 }

@@ -1,1 +1,7 @@
 env
+chrome/*/*.css
+chrome/*/*.js
+safari/*/*.css
+safari/*/*.js
+*.safariextz
+*.db

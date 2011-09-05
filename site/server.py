@@ -7,6 +7,12 @@ from models import QueueItem, User
 import cherrypy
 import simplejson as json 
 
+def allow_cross_origin(f):
+    def responder(*args, **kwargs):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = cherrypy.request.headers.get("Origin", "")
+        return f(*args, **kwargs)
+    return responder
+
 def get_user(email_address):
     user = cherrypy.request.db.query(User).filter(User.email_address == email_address).first()
     # TODO: For now, just create the user if it doesn't exist
@@ -22,21 +28,22 @@ def get_queue(user, movie_id=None):
     return qry
  
 class QueueView(object):
+    @allow_cross_origin
     @cherrypy.expose
     def index(self, email_address):
-        print cherrypy.request.headers
         #TODO: Check content type before returning list
         user = get_user(email_address)
         queue = get_queue(user)
         # TODO: Add the URL of each queued item to the list
         if "application/json" in cherrypy.request.headers["Accept"]:
-            cherrypy.response.headers['Content-Type']= 'application/json'
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps([item.to_dict() for item in queue.all()])
         else:
             list_items = ["<li><a href='%s'>%s</li>" % (item.netflix_url, item.movie_title) for item in queue.all()]
             return "<html><body><h1>Queue</h1><ul>%s</ul></body></html>" % ("\n".join(list_items))
 
 class QueueItemView(object):
+    @allow_cross_origin
     @cherrypy.expose
     def add(self, email_address, movie_id, title=None):
         try:
@@ -50,9 +57,11 @@ class QueueItemView(object):
             return json.dumps({"result":"ok"})
         except Exception, e:
             return json.dumps({"result":"error", "error_msg":str(e)})
-
+            
+    @allow_cross_origin
     @cherrypy.expose
     def delete(self, email_address, movie_id):
+        print "Trying to delete %s" % movie_id
         try:
             # Get the user
             user = get_user(email_address)
@@ -64,6 +73,7 @@ class QueueItemView(object):
         except Exception, e:
             return json.dumps({"result":"error", "error_msg":str(e)})
     
+    @allow_cross_origin
     @cherrypy.expose
     def get(self, email_address, movie_id):
         try:
@@ -76,6 +86,15 @@ class QueueItemView(object):
                 return json.dumps({"queued":False})
         except Exception, e:
             return json.dumps({"queued":False, "error_msg":str(e)})
+     
+    @allow_cross_origin
+    @cherrypy.expose        
+    def options(self, email_address, movie_id):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+        cherrypy.response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PUT, DELETE'
+        cherrypy.response.headers['Access-Control-Max-Age'] = 1000
+        cherrypy.response.headers['Access-Control-Allow-Headers'] = '*'
+        return ""
 
 class Users(object):
     @cherrypy.expose    
@@ -102,6 +121,7 @@ def setup_routes():
     d.connect('queueitem', '/users/:email_address/queue/:movie_id', QueueItemView(), conditions={'method':['POST']}, action="add")
     d.connect('queueitem', '/users/:email_address/queue/:movie_id', QueueItemView(), conditions={'method':['DELETE']}, action="delete")
     d.connect('queueitem', '/users/:email_address/queue/:movie_id', QueueItemView(), conditions={'method':['GET']}, action="get")
+    d.connect('queueitem', '/users/:email_address/queue/:movie_id', QueueItemView(), conditions={'method':['OPTIONS']}, action="options")
     d.connect('main', '/', Root())
     return d
     

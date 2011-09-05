@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>Tony Angerilli</string>
+	<key>CFBundleDisplayName</key>
+	<string>netflixqueue</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.angerilli.netflixqueue</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Database Quota</key>
+		<real>1048576</real>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>End</key>
+			<array>
+				<string>md5-min.js</string>
+				<string>jquery.js</string>
+				<string>netflix-queue.js</string>
+			</array>
+		</dict>
+		<key>Stylesheets</key>
+		<array>
+			<string>css3buttons.css</string>
+			<string>netflix.css</string>
+		</array>
+	</dict>
+	<key>Description</key>
+	<string>Queue movies on the Netflix Canada website</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Allowed Domains</key>
+			<array>
+				<string>ca.movies.netflix.com</string>
+				<string>account.netflix.com</string>
+				<string>localhost:8080</string>
+			</array>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>Some</string>
+		</dict>
+	</dict>
+	<key>Website</key>
+	<string>http://tony.angerilli.ca/netflixqueue</string>
+</dict>
+</plist>
