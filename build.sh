@@ -5,8 +5,5 @@ rm -rf chrome/js chrome/css safari/netflixqueue.safariextension/*.css safari/net
 cp -Rp common/js chrome/js
 cp -Rp common/css/ chrome/css
 
-# cp `pwd`/common/css/*.css safari/netflixqueue.safariextension/
-# cp `pwd`/common/js/*.js safari/netflixqueue.safariextension/
-
 ln `pwd`/common/css/*.css safari/netflixqueue.safariextension/
 ln `pwd`/common/js/*.js safari/netflixqueue.safariextension/

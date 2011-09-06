@@ -1,0 +1,7 @@
+[program:netflix]
+command=%(deploy_dir)s/env/bin/python server.py
+directory=%(deploy_dir)s/site
+user=ubuntu
+autostart=true
+autorestart=true
+redirect_stderr=True

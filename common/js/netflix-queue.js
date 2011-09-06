@@ -81,7 +81,7 @@ function prompt_for_user() {
 }
 
 function get_queue_url() {
-    return "http://localhost:8080/users/" + get_user_email() + "/queue";
+    return "http://netflix.angerilli.ca/users/" + get_user_email() + "/queue";
 }
 
 function get_movie_url(movie_id) {

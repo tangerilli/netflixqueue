@@ -1,0 +1,5 @@
+CherryPy==3.2.0
+Routes==1.12.3
+SQLAlchemy==0.7.2
+simplejson==2.1.6
+wsgiref==0.1.2
